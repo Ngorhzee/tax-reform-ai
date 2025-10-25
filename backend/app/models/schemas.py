@@ -13,8 +13,7 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str = Field(..., description="User's message to the chatbot", min_length=1)
-    session_id: Optional[str] = Field(None, description="Session ID for conversation continuity")
-    chat_history: Optional[List[Message]] = Field(default=[], description="Previous conversation history")
+    session_id: Optional[str] = Field(None, description="Optional session ID to continue a conversation")
 
 
 class ChatResponse(BaseModel):

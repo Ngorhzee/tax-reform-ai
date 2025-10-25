@@ -1,12 +1,15 @@
-# Tax Reform AI Chatbot API
+# Nigerian Tax Reform AI Chatbot API (2026)
 
-An AI-powered chatbot API built with FastAPI, LangChain, and Google Gemini to help users with tax-related questions and guidance.
+An AI-powered chatbot API built with FastAPI, LangChain, and Google Gemini to help Nigerian taxpayers understand the 2026 tax reforms and calculate their tax obligations.
 
 ## Features
 
 - AI-powered conversational interface using Google Gemini
-- Tax assistance and guidance
-- Session-based conversation history
+- Specialized in Nigerian tax law for 2026
+- Automatic tax bracket identification based on income
+- Step-by-step tax calculation with Nigerian tax brackets
+- Information on tax reliefs and allowances
+- Session-based conversation history using ConversationBufferMemory
 - RESTful API with FastAPI
 - Easy integration with frontend applications
 
@@ -156,16 +159,22 @@ POST /api/v1/chat
 Content-Type: application/json
 
 {
-  "message": "I need help with my taxes",
-  "session_id": "optional-session-id",
-  "chat_history": []
+  "message": "I need help with my Nigerian taxes for 2026",
+  "session_id": "optional-session-id"
 }
 ```
+
+**Note:**
+- Only `message` is required
+- `session_id` is optional - omit it to start a new conversation
+- The API automatically manages conversation history using ConversationBufferMemory
+- Include the `session_id` from the response in subsequent requests to continue the conversation
+- The chatbot is specialized in Nigerian tax law for the 2026 tax year
 
 Response:
 ```json
 {
-  "response": "Hello! I'd be happy to help you with your taxes...",
+  "response": "Hello! I'd be happy to help you understand your Nigerian tax obligations for 2026...",
   "session_id": "abc-123-def",
   "timestamp": "2025-10-25T12:00:00"
 }
@@ -189,7 +198,7 @@ DELETE /api/v1/chat/session/{session_id}
 curl -X POST "http://localhost:8000/api/v1/chat" \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "What tax bracket am I in if I earn $75,000 per year?"
+    "message": "What tax bracket am I in if I earn ₦2,500,000 per year?"
   }'
 ```
 
@@ -198,16 +207,30 @@ curl -X POST "http://localhost:8000/api/v1/chat" \
 ```python
 import requests
 
+# Start a new conversation
 response = requests.post(
     "http://localhost:8000/api/v1/chat",
     json={
-        "message": "What tax bracket am I in if I earn $75,000 per year?"
+        "message": "What tax bracket am I in if I earn ₦2,500,000 per year?"
     }
 )
 
 data = response.json()
 print(f"Bot: {data['response']}")
-print(f"Session ID: {data['session_id']}")
+session_id = data['session_id']
+print(f"Session ID: {session_id}")
+
+# Continue the conversation
+response2 = requests.post(
+    "http://localhost:8000/api/v1/chat",
+    json={
+        "message": "I am a salaried employee. How much tax will I pay?",
+        "session_id": session_id
+    }
+)
+
+data2 = response2.json()
+print(f"Bot: {data2['response']}")
 ```
 
 ### Using JavaScript fetch
@@ -219,7 +242,7 @@ const response = await fetch('http://localhost:8000/api/v1/chat', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    message: "What tax bracket am I in if I earn $75,000 per year?"
+    message: "What tax bracket am I in if I earn ₦2,500,000 per year?"
   })
 });
 
@@ -269,16 +292,22 @@ Edit the `.env` file to customize:
 
 ## What the Chatbot Does
 
-The Tax Reform AI Chatbot helps users by:
+The Nigerian Tax Reform AI Chatbot helps taxpayers by:
 
-1. Understanding their tax situation through conversational questions
-2. Identifying tax brackets based on income
-3. Explaining taxable and non-taxable income
-4. Guiding through common tax scenarios
-5. Providing information about deductions and credits
-6. Explaining tax deadlines and requirements
+1. **Identifying tax brackets** - Determines which Nigerian tax bracket users fall into based on their annual income (in Naira)
+2. **Calculating tax liability** - Provides step-by-step calculations using the 2026 Nigerian tax brackets:
+   - First ₦300,000: 7%
+   - Next ₦300,000: 11%
+   - Next ₦500,000: 15%
+   - Next ₦500,000: 19%
+   - Next ₦1,400,000: 21%
+   - Above ₦3,200,000: 24%
+3. **Explaining tax reliefs** - Information about Consolidated Relief Allowance and other deductions
+4. **Clarifying taxable income** - What counts as taxable vs. non-taxable income under Nigerian law
+5. **Guiding through scenarios** - Help with PAYE, self-employment, business income, and more
+6. **FIRS requirements** - Information about filing deadlines and Federal Inland Revenue Service requirements
 
-The bot asks clarifying questions to better understand each user's unique situation and provides helpful, easy-to-understand guidance.
+The bot asks clarifying questions to better understand each user's unique situation and provides helpful, easy-to-understand guidance specific to Nigerian tax law.
 
 ## Important Notes
 
