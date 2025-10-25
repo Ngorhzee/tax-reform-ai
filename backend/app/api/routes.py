@@ -22,14 +22,14 @@ async def chat(request: ChatRequest):
     """
     Chat endpoint for tax assistance
 
-    Accepts a user message and optional conversation history,
-    returns AI assistant's response
+    Accepts a user message and optional session_id for conversation continuity.
+    Memory is automatically managed using ConversationBufferMemory.
+    Returns AI assistant's response with session_id.
     """
     try:
         response_text, session_id = await chatbot_service.get_response(
             user_message=request.message,
-            session_id=request.session_id,
-            chat_history=request.chat_history
+            session_id=request.session_id
         )
 
         return ChatResponse(

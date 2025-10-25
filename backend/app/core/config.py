@@ -7,9 +7,9 @@ class Settings(BaseSettings):
     """Application settings"""
 
     # API Settings
-    API_TITLE: str = "Tax Reform AI Chatbot"
+    API_TITLE: str = "Nigerian Tax Reform AI Chatbot (2026)"
     API_VERSION: str = "1.0.0"
-    API_DESCRIPTION: str = "AI-powered chatbot to help users with tax-related questions"
+    API_DESCRIPTION: str = "AI-powered chatbot to help Nigerian taxpayers understand the 2026 tax reforms and calculate tax obligations"
 
     # Google Gemini API
     GOOGLE_API_KEY: str
