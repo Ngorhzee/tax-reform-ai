@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Calculator</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+        .card-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .loader {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function TaxChatbot() {
+            const [messages, setMessages] = useState([
+                { sender: "bot", text: "Hello! I can help you calculate your tax. What's your annual income?" }
+            ]);
+            const [input, setInput] = useState("");
+            const [loading, setLoading] = useState(false);
+            const [context, setContext] = useState({ income: null, country: null });
+
+            const handleSend = async (e) => {
+                e.preventDefault();
+                if (!input.trim()) return;
+
+                const newMessages = [...messages, { sender: "user", text: input }];
+                setMessages(newMessages);
+                setLoading(true);
+
+                try {
+                    let reply = "";
+
+                    // Step 1: Capture income
+                    if (!context.income) {
+                        const income = parseFloat(input);
+                        if (isNaN(income) || income <= 0) {
+                            reply = "Please enter a valid income amount (a number greater than 0).";
+                        } else {
+                            setContext({ ...context, income });
+                            reply = "Got it! Now, please tell me your country (e.g., US, UK, NG, CA).";
+                        }
+                    }
+                    // Step 2: Capture country and calculate tax
+                    else if (!context.country) {
+                        const country = input.trim().toLowerCase();
+                        setContext({ ...context, country });
+
+                        // Simple tax calculation (you can replace this with actual API call)
+                        let taxAmount = 0;
+                        let classification = "";
+
+                        if (country === "us") {
+                            if (context.income <= 10275) {
+                                taxAmount = context.income * 0.10;
+                                classification = "10% bracket";
+                            } else if (context.income <= 41775) {
+                                taxAmount = 1027.50 + (context.income - 10275) * 0.12;
+                                classification = "12% bracket";
+                            } else if (context.income <= 89450) {
+                                taxAmount = 4807.50 + (context.income - 41775) * 0.22;
+                                classification = "22% bracket";
+                            } else if (context.income <= 190750) {
+                                taxAmount = 15213.50 + (context.income - 89450) * 0.24;
+                                classification = "24% bracket";
+                            } else if (context.income <= 364200) {
+                                taxAmount = 34647.50 + (context.income - 190750) * 0.32;
+                                classification = "32% bracket";
+                            } else if (context.income <= 462550) {
+                                taxAmount = 49335.50 + (context.income - 364200) * 0.35;
+                                classification = "35% bracket";
+                            } else {
+                                taxAmount = 162718 + (context.income - 462550) * 0.37;
+                                classification = "37% bracket";
+                            }
+                        } else if (country === "uk") {
+                            if (context.income <= 12570) {
+                                taxAmount = 0;
+                                classification = "Personal allowance";
+                            } else if (context.income <= 50270) {
+                                taxAmount = (context.income - 12570) * 0.20;
+                                classification = "Basic rate (20%)";
+                            } else if (context.income <= 125140) {
+                                taxAmount = 7540 + (context.income - 50270) * 0.40;
+                                classification = "Higher rate (40%)";
+                            } else {
+                                taxAmount = 35440 + (context.income - 125140) * 0.45;
+                                classification = "Additional rate (45%)";
+                            }
+                        } else if (country === "ng") {
+                            if (context.income <= 300000) {
+                                taxAmount = context.income * 0.07;
+                                classification = "7% bracket";
+                            } else if (context.income <= 600000) {
+                                taxAmount = 21000 + (context.income - 300000) * 0.11;
+                                classification = "11% bracket";
+                            } else if (context.income <= 1100000) {
+                                taxAmount = 54000 + (context.income - 600000) * 0.15;
+                                classification = "15% bracket";
+                            } else if (context.income <= 1600000) {
+                                taxAmount = 129000 + (context.income - 1100000) * 0.19;
+                                classification = "19% bracket";
+                            } else if (context.income <= 3200000) {
+                                taxAmount = 224000 + (context.income - 1600000) * 0.21;
+                                classification = "21% bracket";
+                            } else {
+                                taxAmount = 560000 + (context.income - 3200000) * 0.24;
+                                classification = "24% bracket";
+                            }
+                        } else if (country === "ca") {
+                            if (context.income <= 50197) {
+                                taxAmount = context.income * 0.15;
+                                classification = "15% bracket";
+                            } else if (context.income <= 100392) {
+                                taxAmount = 7529.55 + (context.income - 50197) * 0.205;
+                                classification = "20.5% bracket";
+                            } else if (context.income <= 155625) {
+                                taxAmount = 17832.45 + (context.income - 100392) * 0.26;
+                                classification = "26% bracket";
+                            } else if (context.income <= 221708) {
+                                taxAmount = 32189.43 + (context.income - 155625) * 0.29;
+                                classification = "29% bracket";
+                            } else {
+                                taxAmount = 51369.35 + (context.income - 221708) * 0.33;
+                                classification = "33% bracket";
+                            }
+                        } else {
+                            // Default calculation for other countries
+                            taxAmount = context.income * 0.20;
+                            classification = "Estimated 20% tax rate";
+                        }
+
+                        reply = `Your estimated tax is $${taxAmount.toFixed(2)}. Classification: ${classification}. Would you like to calculate again?`;
+                        setContext({ income: null, country: null });
+                    } else {
+                        reply = "Let's start again. What's your annual income?";
+                        setContext({ income: null, country: null });
+                    }
+
+                    setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
+                } catch (err) {
+                    setMessages((prev) => [...prev, { sender: "bot", text: "Error: " + err.message }]);
+                } finally {
+                    setInput("");
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+                    <div className="card w-full max-w-md shadow-lg flex flex-col">
+                        <div className="card-header">
+                            <h2 className="text-xl font-semibold text-center">Tax Calculator</h2>
+                        </div>
+                        <div className="flex flex-col h-[500px] overflow-hidden">
+                            <div className="flex-1 overflow-y-auto mb-3 space-y-3 p-2 bg-gray-100 rounded-md">
+                                {messages.map((msg, i) => (
+                                    <div
+                                        key={i}
+                                        className={`p-2 rounded-lg max-w-[80%] ${
+                                            msg.sender === "bot"
+                                                ? "bg-blue-100 text-gray-800 self-start"
+                                                : "bg-green-100 text-gray-900 self-end ml-auto"
+                                        }`}
+                                    >
+                                        {msg.text}
+                                    </div>
+                                ))}
+                                {loading && (
+                                    <div className="flex items-center space-x-2 text-gray-500">
+                                        <div className="loader w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                                        <span>Thinking...</span>
+                                    </div>
+                                )}
+                            </div>
+                            <form onSubmit={handleSend} className="flex space-x-2">
+                                <input
+                                    className="input"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Type your message..."
+                                    disabled={loading}
+                                />
+                                <button type="submit" className="button" disabled={loading}>
+                                    Send
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<TaxChatbot />, document.getElementById('root'));
+    </script>
+</body>
+</html>
